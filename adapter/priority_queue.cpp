@@ -3,22 +3,6 @@
 #include <vector>
 
 namespace trivial {
-template <typename Cont, typename Cmp>
-void heapify(Cont& arr, size_t l, size_t r, Cmp cmp) {
-  using std::swap;
-  auto parent{l};
-  auto child{2 * parent + 1};
-  while (child < r) {
-    if (child + 1 < r && cmp(arr[child], arr[child + 1])) ++child;
-    if (cmp(arr[parent], arr[child]))
-      swap(arr[parent], arr[child]);
-    else
-      return;
-    parent = child;
-    child = 2 * parent + 1;
-  }
-}
-
 template <typename T, typename Cont = std::vector<T>,
           typename Cmp = std::less<T>>
 class priority_queue {
@@ -26,30 +10,47 @@ class priority_queue {
   Cmp cmp{};
 
  private:
-  void make_heap() {
-    const auto size{this->size()};
-    for (int i = size / 2 - 1; i > -1; --i) heapify(cont, i, size, cmp);
-  }
-  void push_heap() {
+  static void heapify(Cont& arr, size_t l, size_t r, Cmp cmp) {
     using std::swap;
-    int size = cont.size();
-    int child{size - 1};
-    int parent{(child - 1) / 2};
-    while (child > 0) {
-      if (cmp(cont[parent], cont[child]))
-        swap(cont[parent], cont[child]);
+    auto parent{l};
+    auto child{2 * parent + 1};
+    while (child + 1 < r) {
+      if (child + 1 < r && cmp(arr[child], arr[child + 1])) ++child;
+      if (cmp(arr[parent], arr[child]))
+        swap(arr[parent], arr[child]);
+      else
+        return;
+      parent = child;
+      child = 2 * parent + 1;
+    }
+  }
+
+  static void heapify_backward(Cont& arr, size_t l, size_t r, Cmp cmp) {
+    using std::swap;
+    auto child{r - 1};
+    auto parent{(child - 1) / 2};
+    while (parent >= l) {
+      if (cmp(arr[parent], arr[child]))
+        swap(arr[parent], arr[child]);
       else
         return;
       child = parent;
       parent = (child - 1) / 2;
     }
   }
+
+  void make_heap() {
+    const auto size{this->size()};
+    for (int i = size / 2 - 1; i > -1; --i) heapify(cont, i, size, cmp);
+  }
+  void push_heap() { heapify_backward(cont, 0, size(), cmp); }
   void pop_heap() { heapify(cont, 0, size(), cmp); }
 
  public:
   priority_queue() = default;
   ~priority_queue() = default;
-  priority_queue(const Cont& c, Cmp cp) : cont(c), cmp(std::move(cp)) {
+  priority_queue(const Cont& c, Cmp cp = std::less<T>{})
+      : cont(c), cmp(std::move(cp)) {
     make_heap();
   }
   explicit priority_queue(Cmp cp) : cmp(std::move(cp)){};
@@ -72,8 +73,7 @@ class priority_queue {
 
   bool empty() const noexcept { return cont.empty(); }
   size_t size() const noexcept { return cont.size(); }
-  T& front() { return cont.front(); };
-  const T& front() const { return const_cast<priority_queue*>(this)->front(); }
+  const T& front() const { return cont.front(); }
   void push(const T& t) {
     cont.push_back(t);
     push_heap();
