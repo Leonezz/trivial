@@ -48,7 +48,6 @@ class shared_ptr {
     shared_ptr().swap(other);
   }
   shared_ptr& operator=(shared_ptr other) {
-    release();
     other.swap(*this);
     return *this;
   }
