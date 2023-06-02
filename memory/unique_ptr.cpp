@@ -5,18 +5,18 @@ class unique_ptr {
   T* ptr{};
 
  public:
-  unique_ptr() = default;
+  unique_ptr() noexcept = default;
   ~unique_ptr() {
     if (ptr) delete ptr;
   }
-  explicit unique_ptr(T* p) : ptr(p) {}
+  explicit unique_ptr(T* p) noexcept : ptr(p) {}
   unique_ptr(const unique_ptr&) = delete;
   unique_ptr(unique_ptr&& other) noexcept : ptr(other.ptr) {
     unique_ptr().swap(other);
   }
 
   unique_ptr& operator=(const unique_ptr& other) = delete;
-  unique_ptr& operator=(unique_ptr&& other) {
+  unique_ptr& operator=(unique_ptr&& other) noexcept {
     other.swap(*this);
     return *this;
   }
@@ -25,13 +25,13 @@ class unique_ptr {
   T* operator->() const noexcept { return get(); }
   T& operator*() const { return *get(); }
 
-  T* release() {
+  T* release() noexcept {
     T* p{};
     std::swap(p, ptr);
     return p;
   }
 
-  explicit operator bool() { return get(); }
+  explicit operator bool() noexcept { return get(); }
   void swap(unique_ptr& other) noexcept {
     using std::swap;
     swap(other.ptr, ptr);
