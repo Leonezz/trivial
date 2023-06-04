@@ -28,26 +28,25 @@ class shared_ptr {
     }
   }
   void use() {
-    assert(_ref_cnt);
-    _ref_cnt->increment();
+    if (_ref_cnt) _ref_cnt->increment();
   }
 
  public:
-  shared_ptr() = default;
+  shared_ptr() noexcept = default;
   ~shared_ptr() { release(); }
   explicit shared_ptr(T* ptr) try : _ptr(ptr), _ref_cnt(new RefCount) {
   } catch (...) {
     delete ptr;
     throw;
   }
-  shared_ptr(const shared_ptr& other)
+  shared_ptr(const shared_ptr& other) noexcept
       : _ptr(other._ptr), _ref_cnt(other._ref_cnt) {
     use();
   }
-  shared_ptr(shared_ptr&& other) : _ptr(other._ptr), _ref_cnt(other._ref_cnt) {
+  shared_ptr(shared_ptr&& other) noexcept : _ptr(other._ptr), _ref_cnt(other._ref_cnt) {
     shared_ptr().swap(other);
   }
-  shared_ptr& operator=(shared_ptr other) {
+  shared_ptr& operator=(shared_ptr other) noexcept {
     other.swap(*this);
     return *this;
   }
