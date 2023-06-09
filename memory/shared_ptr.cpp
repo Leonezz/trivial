@@ -32,7 +32,7 @@ class shared_ptr {
   }
 
  public:
-  shared_ptr() noexcept = default;
+  constexpr shared_ptr() noexcept = default;
   ~shared_ptr() { release(); }
   explicit shared_ptr(T* ptr) try : _ptr(ptr), _ref_cnt(new RefCount) {
   } catch (...) {
